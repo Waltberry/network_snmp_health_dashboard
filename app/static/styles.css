@@ -1,0 +1,123 @@
+/* Global layout */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+h1 {
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+section {
+  margin-top: 1.5rem;
+}
+
+/* Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 0.9rem 1rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.card h3 {
+  margin: 0 0 0.4rem 0;
+  font-size: 1rem;
+}
+
+.card .if-index {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-left: 0.5rem;
+}
+
+.card p {
+  margin: 0.15rem 0;
+  font-size: 0.9rem;
+}
+
+.card .timestamp {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Status colours shared with table */
+.healthy {
+  color: #0a7d00;
+  font-weight: 600;
+}
+
+.warn {
+  color: #b8860b;
+  font-weight: 600;
+}
+
+.critical {
+  color: #b00020;
+  font-weight: 600;
+}
+
+.badge.healthy {
+  background: rgba(10, 125, 0, 0.12);
+}
+
+.badge.warn {
+  background: rgba(184, 134, 11, 0.12);
+}
+
+.badge.critical {
+  background: rgba(176, 0, 32, 0.12);
+}
+
+/* Table */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0.75rem;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+th, td {
+  border: 1px solid #e5e7eb;
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+thead {
+  background: #f9fafb;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}

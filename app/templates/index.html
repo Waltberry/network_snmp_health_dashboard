@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNMP Network Health Dashboard</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <h1>SNMP Network Health Dashboard</h1>
+  <p class="subtitle">
+    Simple SNMP collector + FastAPI backend + SQLite. Refreshes every 10 seconds.
+  </p>
+
+  <!-- Overview cards -->
+  <section>
+    <h2>Interface Overview</h2>
+    <div id="summary-cards" class="card-grid">
+      <div class="card">Loading summary…</div>
+    </div>
+  </section>
+
+  <!-- Detailed table -->
+  <section>
+    <h2>Latest Interface Metrics</h2>
+    <p>Latest sample per interface (stubbed or real SNMP).</p>
+    <table id="latest-table">
+      <thead>
+        <tr>
+          <th>ifIndex</th>
+          <th>Name</th>
+          <th>Admin</th>
+          <th>Oper</th>
+          <th>In Util (%)</th>
+          <th>Out Util (%)</th>
+          <th>In Errors</th>
+          <th>Out Errors</th>
+          <th>Last Seen</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="latest-body">
+        <tr><td colspan="10">Loading…</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script>
+    // ---------- SUMMARY / CARDS ----------
+    async function fetchSummary() {
+      try {
+        const resp = await fetch("/interfaces/summary");
+        if (!resp.ok) throw new Error("Bad response: " + resp.status);
+        const data = await resp.json();
+
+        const container = document.getElementById("summary-cards");
+        container.innerHTML = "";
+
+        if (data.length === 0) {
+          container.innerHTML = "<div class='card'>No summary data yet.</div>";
+          return;
+        }
+
+        for (const row of data) {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          const availability = row.availability_percent.toFixed(1);
+          const errorRate = row.error_rate_percent.toFixed(3);
+
+          const severityClass =
+            availability < 95 || errorRate > 1 ? "critical"
+            : availability < 99 ? "warn"
+            : "healthy";
+
+          card.innerHTML = `
+            <h3>${row.if_name} <span class="if-index">ifIndex ${row.if_index}</span></h3>
+            <p>Samples: <strong>${row.sample_count}</strong></p>
+            <p>Availability: <strong>${availability}%</strong></p>
+            <p>Error rate: <strong>${errorRate}%</strong></p>
+            <p class="timestamp">Last sample: ${row.last_sample_time}</p>
+            <span class="badge ${severityClass}">${severityClass.toUpperCase()}</span>
+          `;
+
+          container.appendChild(card);
+        }
+      } catch (err) {
+        console.error("Error fetching summary", err);
+      }
+    }
+
+    // ---------- LATEST TABLE ----------
+    async function fetchLatest() {
+      try {
+        const resp = await fetch("/interfaces/latest");
+        if (!resp.ok) throw new Error("Bad response: " + resp.status);
+        const data = await resp.json();
+
+        const tbody = document.getElementById("latest-body");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='10'>No data yet.</td></tr>";
+          return;
+        }
+
+        for (const row of data) {
+          const tr = document.createElement("tr");
+          const status = computeStatus(row);
+
+          tr.innerHTML = `
+            <td>${row.if_index}</td>
+            <td>${row.if_name}</td>
+            <td>${row.admin_status}</td>
+            <td>${row.oper_status}</td>
+            <td>${row.in_util_percent.toFixed(2)}</td>
+            <td>${row.out_util_percent.toFixed(2)}</td>
+            <td>${row.in_errors}</td>
+            <td>${row.out_errors}</td>
+            <td>${row.sample_time}</td>
+            <td class="${status.toLowerCase()}">${status}</td>
+          `;
+
+          tbody.appendChild(tr);
+        }
+      } catch (err) {
+        console.error("Error fetching latest", err);
+      }
+    }
+
+    function computeStatus(row) {
+      // Simple demo logic: tweak thresholds as you like
+      if (row.oper_status !== 1) return "CRITICAL";  // interface down
+      if (row.in_errors > 100 || row.out_errors > 100) return "CRITICAL";
+      if (row.in_util_percent > 80 || row.out_util_percent > 80) return "WARN";
+      return "HEALTHY";
+    }
+
+    // Initial load + 10s refresh loop
+    fetchSummary();
+    fetchLatest();
+    setInterval(() => {
+      fetchSummary();
+      fetchLatest();
+    }, 10_000);
+  </script>
+</body>
+</html>

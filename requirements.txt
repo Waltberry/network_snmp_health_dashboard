@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pysnmp==4.4.12
+sqlmodel
+aiosqlite
+python-dotenv
+jinja2
+pydantic-settings
+pyasn1==0.4.8
+snmpsim
